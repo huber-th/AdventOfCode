@@ -69,9 +69,9 @@ def find_loop_length(rows: [str]) -> int:
     """ Find the loop and return it's length """
     max_length = 0
     curr = start = ('|', 19, 88)
-    step = 'U'
+    step = 'D'
     length = 0
-    row_tiles = {19: [88]}
+    row_tiles = {curr[1]: [curr[2]]}
     while True:
         nxt = next_position(rows, curr, step)
         length += 1
@@ -91,49 +91,122 @@ def find_loop_length(rows: [str]) -> int:
     for row in row_tiles.items():
         loop_map_row = []
         for i in range(0, len(rows[0])):
-            loop_map_row.append(rows[row[0]][i] if i in row[1] else '.')
+            if rows[row[0]][i] == 'S':
+                loop_map_row.append(start[0])
+            else:
+                loop_map_row.append(rows[row[0]][i] if i in row[1] else '.')
         loop_map.append(loop_map_row)
     return (max_length, loop_map)
 
 
-def get_x_y_from_curr(curr: (str, int, int), direction: str) -> (int, int):
+def get_x_y_from_curr_looking_left(curr: (str, int, int), direction: str) -> (int, int):
     """ Get the x,y coordinates to check for flood fill """
     if curr[0] == '|' and direction == "D":
-        return curr[1], curr[2]+1
+        return [(curr[1], curr[2]+1)]
     if curr[0] == '|' and direction == "U":
-        return curr[1], curr[2]-1
+        return [(curr[1], curr[2]-1)]
     if curr[0] == '-' and direction == "L":
-        return curr[1]+1, curr[2]
+        return [(curr[1]+1, curr[2])]
     if curr[0] == '-' and direction == "R":
-        return curr[1]-1, curr[2]
-    return -1, -1
+        return [(curr[1]-1, curr[2])]
+    if curr[0] == 'F' and direction == "R":
+        return [(curr[1]-1, curr[2]), (curr[1], curr[2]-1), (curr[1]-1, curr[2]-1)]
+    if curr[0] == 'F' and direction == "D":
+        return [(curr[1]+1, curr[2]+1)]
+    if curr[0] == '7' and direction == "L":
+        return [(curr[1]-1, curr[2]-1)]
+    if curr[0] == '7' and direction == "D":
+        return [(curr[1]-1, curr[2]), (curr[1]-1, curr[2]+1), (curr[1], curr[2]+1)]
+    if curr[0] == 'J' and direction == "U":
+        return [(curr[1]-1, curr[2]-1)]
+    if curr[0] == 'J' and direction == "L":
+        return [(curr[1]+1, curr[2]), (curr[1]+1, curr[2]+1), (curr[1], curr[2]+1)]
+    if curr[0] == 'L' and direction == "R":
+        return [(curr[1]+1, curr[2]-1)]
+    if curr[0] == 'L' and direction == "U":
+        return [(curr[1], curr[2]+1), (curr[1]-1, curr[2]+1), (curr[1]-1, curr[2])]
+    return [(-1, -1)]
+
+
+def get_x_y_from_curr_looking_right(curr: (str, int, int), direction: str) -> (int, int):
+    """ Get the x,y coordinates to check for flood fill """
+    if curr[0] == '|' and direction == "D":
+        return [(curr[1], curr[2]-1)]
+    if curr[0] == '|' and direction == "U":
+        return [(curr[1], curr[2]+1)]
+    if curr[0] == '-' and direction == "L":
+        return [(curr[1]-1, curr[2])]
+    if curr[0] == '-' and direction == "R":
+        return [(curr[1]+1, curr[2])]
+    if curr[0] == 'F' and direction == "D":
+        return [(curr[1]-1, curr[2]), (curr[1], curr[2]-1), (curr[1]-1, curr[2]-1)]
+    if curr[0] == 'F' and direction == "R":
+        return [(curr[1]+1, curr[2]+1)]
+    if curr[0] == '7' and direction == "L":
+        return [(curr[1]-1, curr[2]), (curr[1]-1, curr[2]+1), (curr[1], curr[2]+1)]
+    if curr[0] == '7' and direction == "D":
+        return [(curr[1]+1, curr[2]-1)]
+    if curr[0] == 'J' and direction == "L":
+        return [(curr[1]-1, curr[2]-1)]
+    if curr[0] == 'J' and direction == "U":
+        return [(curr[1]+1, curr[2]), (curr[1]+1, curr[2]+1), (curr[1], curr[2]+1)]
+    if curr[0] == 'L' and direction == "U":
+        return [(curr[1]-1, curr[2]+1)]
+    if curr[0] == 'L' and direction == "R":
+        return [(curr[1], curr[2]-1), (curr[1]+1, curr[2]-1), (curr[1]+1, curr[2])]
+    return [(-1, -1)]
 
 
 def flood_recursive(x, y, flood_map, depth: int) -> int:
     """ Fill enclosed tiles with 'I' """
-    # Check for map boundaries and stop if we step beyond the 2d world
     if x < 0 or y < 0 or x >= len(flood_map) or y >= len(flood_map[0]):
         return 0
-    # if the spot is not a '.' we do not need to continue
-    # it's either part of the loop or already marked
     if flood_map[x][y] != '.':
         return 0
-    # update the color of the current square to the replacement color
-    print(f'Marking {x}:{y} as enclosed')
     flood_map[x][y] = 'I'
     count = 1
-    neighbors = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+    neighbors = [(x-1, y), (x+1, y), (x, y-1), (x, y+1),
+                 (x-1, y-1), (x+1, y+1), (x+1, y-1), (x-1, y+1)]
     for n in neighbors:
         next_depth = depth + 1
         count += flood_recursive(n[0], n[1], flood_map, next_depth)
     return count
 
 
+def find_enclosed_tiles(loop_map: [[str]]) -> int:
+    """
+    Follow the loop and find enclosed tiles using flood fill and return the count
+    """
+    curr = start = ('|', 16, 88)
+    direction = 'D'
+    count = 0
+    while True:
+        # Start flood fill to the right
+        start_flood_points = get_x_y_from_curr_looking_right(curr, direction)
+        if start_flood_points[0][0] != -1 and start_flood_points[0][1] != -1:
+            for start_flood in start_flood_points:
+                count += flood_recursive(start_flood[0],
+                                         start_flood[1], loop_map, 0)
+        nxt = next_position(loop_map, curr, direction)
+        if nxt[1] == start[1] and nxt[2] == start[2]:
+            break
+        direction = next_direction(nxt[0], direction)
+        curr = nxt
+    return count
+
+
 if __name__ == '__main__':
     data = load_data('input')
-
     print('Part one:')
     result = find_loop_length(data)
     print(result[0]/2)
 
+    # with open("loop_map", "w") as txt_file:
+    #     for line in result[1]:
+    #         txt_file.write(''.join(line) + "\n")
+
     print('Part two:')
+    print(find_enclosed_tiles(result[1]))
+    # with open("flood_map", "w") as txt_file:
+    #     for line in result[1]:
+    #         txt_file.write(''.join(line) + "\n")
