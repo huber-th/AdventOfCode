@@ -1,5 +1,6 @@
 """ filesystem paths module """
 from pathlib import Path
+from functools import lru_cache
 
 
 def load_data(file: str):
@@ -10,81 +11,77 @@ def load_data(file: str):
     return c
 
 
-def validate_row(r) -> bool:
-    """ Validate a row """
-    split = r.split(' ')
-    counts = list(map(int, split[1].split(',')))
-    row_spring_counts = []
-    counter = 0
-    for c in split[0]:
-        if c == '#':
-            counter += 1
-        elif counter > 0:
-            row_spring_counts.append(counter)
-            counter = 0
-    if counter > 0:
-        row_spring_counts.append(counter)
-    return counts == row_spring_counts
+@lru_cache(maxsize=None, typed=False)
+def solve(p, r, c):
+    """ Solve the pattern one spot at a time """
+    if len(c) == 0:
+        if p.count('#') == 0:
+            return 1
+        else:
+            return 0
 
+    if len(p) == 0 and len(c) == 1 and r == c[0]:
+        return 1
 
-def generate_combinations(n, combination, all_combinations):
-    """ Generate combinations """
-    if n == 0:
-        all_combinations.append(''.join(combination))
-        return
+    if len(p) == 0 and len(c) > 0:
+        return 0
 
-    combination[n - 1] = '.'
-    generate_combinations(n - 1, combination, all_combinations)
+    # Current spot is a ?
+    if p[0] == '?':
+        if not r:
+            return solve('#'+p[1:], None, c) + solve('.'+p[1:], None, c)
+        else:
+            if r == c[0]:
+                return solve(p[1:], None, c[1:])
+            else:
+                return solve(p[1:], r+1, c)
 
-    combination[n - 1] = '#'
-    generate_combinations(n - 1, combination, all_combinations)
+    # Current spot is a .
+    if p[0] == '.':
+        if not r:
+            return solve(p[1:], None, c)
+        else:
+            if r == c[0]:
+                return solve(p[1:], None, c[1:])
+            else:
+                return 0
 
-
-def generate_all_combinations(count_unknown):
-    """ 
-    Genreate all combinations of # and . for the amount 
-    of unknown spots 
-    """
-    all_combinations = []
-    initial_combination = [''] * count_unknown
-    generate_combinations(count_unknown,
-                          initial_combination, all_combinations)
-
-    return all_combinations
-
-
-def fill_question_marks(row, possible_combinations):
-    """ Fill question marks """
-    filled_rows = []
-    for c in possible_combinations:
-        combo = row
-        for s in c:
-            combo = combo.replace('?', s, 1)
-        filled_rows.append(combo)
-    return filled_rows
-
-
-def find_valid_arrangements(row_with_unknowns) -> int:
-    """ Find all possible arrangements to complete the row """
-    # Count ? in row
-    count_unknowns = row_with_unknowns.count('?')
-    possible_combinations = generate_all_combinations(count_unknowns)
-    row_combinations = fill_question_marks(
-        row_with_unknowns, possible_combinations)
-    valid_combinations = 0
-    for r in row_combinations:
-        if validate_row(r):
-            valid_combinations += 1
-    return valid_combinations
+    # Current spot is a #
+    if p[0] == '#':
+        if r:
+            if r+1 == c[0] and len(p) > 1 and p[1] == '#':
+                return 0
+            if r == c[0]:
+                return 0
+            else:
+                return solve(p[1:], r+1, c)
+        else:
+            return solve(p[1:], 1, c)
+    return 0
 
 
 if __name__ == '__main__':
     data = load_data('input')
 
-    print('Part one:')
     result: int = 0
     for row in data:
-        result += find_valid_arrangements(row)
+        split = row.split(' ')
+        springs = split[0]
+        counts = tuple(map(int, split[1].split(',')))
+        result += solve(springs, None, counts)
+
+    print('Part one:')
     print(result)
 
     print('Part two:')
+    result: int = 0
+    for row in data:
+        split = row.split(' ')
+        springs = split[0]
+        counts = tuple(map(int, split[1].split(',')))
+        nsprings = springs
+        for _ in range(0, 4):
+            nsprings += '?'
+            nsprings += springs
+        result += solve(nsprings, None, counts*5)
+    print(result)
