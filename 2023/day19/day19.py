@@ -1,6 +1,6 @@
 """ filesystem paths module """
-from os import name
 from pathlib import Path
+from copy import deepcopy
 
 
 def load_data(file: str):
@@ -69,9 +69,37 @@ class Workflow():
                     return rule.target
             if comparison is None:
                 return rule.target
+        raise Exception('No rule applied.')
 
     def __str__(self) -> str:
         return f'Workflow {self.name} with rules {[x.__str__() for x in self.rules]}'
+
+
+def solve_workflow_combinations(part, wf_name: str, workflows: dict[str,Workflow], accepted_parts):
+    """ Calculate the number of combinations ending in accepting a part """
+    wf = workflows[wf_name]
+    rule_applied_part = deepcopy(part)
+    rule_not_applied_part = deepcopy(part)
+    for rule in wf.rules:
+        if rule.condition.comparison is not None and rule.condition.target is not None:
+            if rule.condition.comparison == '<':
+                if rule.condition.target < rule_applied_part[rule.condition.property][1]:
+                    rule_applied_part[rule.condition.property][1] = rule.condition.target
+                rule_not_applied_part[rule.condition.property][0] = rule.condition.target
+            if rule.condition.comparison == '>':
+                if rule.condition.target + 1 > rule_applied_part[rule.condition.property][0]:
+                    rule_applied_part[rule.condition.property][0] = rule.condition.target + 1
+                rule_not_applied_part[rule.condition.property][1] = rule.condition.target + 1
+
+        if rule.target == 'R':
+            rule_applied_part = deepcopy(rule_not_applied_part)
+            continue
+        if rule.target == 'A':
+            accepted_parts.append(deepcopy(rule_applied_part))
+            rule_applied_part = deepcopy(rule_not_applied_part)
+            continue
+        solve_workflow_combinations(rule_applied_part, rule.target, workflows, accepted_parts)
+        rule_applied_part = deepcopy(rule_not_applied_part) 
 
 
 if __name__ == '__main__':
@@ -97,14 +125,23 @@ if __name__ == '__main__':
         workflow = wf['in']
         p = Part(part)
         while True: 
-            workflow = workflow.process(p)
-            if workflow == 'A' or workflow == 'R':
-                if workflow == 'A':
+            next_wf_name = workflow.process(p)
+            if next_wf_name == 'A' or next_wf_name == 'R':
+                if next_wf_name == 'A':
                     res += sum([int(x) for x in p.properties.values()])
                 break
-            workflow = wf[workflow]
+            workflow = wf[next_wf_name]
 
     print('Part one:')
     print(res)
 
+    accepted_parts = []
+    solve_workflow_combinations({'x':[1,4001],'m':[1,4001],'a':[1,4001],'s':[1,4001]}, 'in', wf, accepted_parts)
+    combos = 0
+    for p in accepted_parts:
+        res = 1
+        for k in p:
+            res *= p[k][1]-p[k][0]
+        combos += res
     print('Part two:')
+    print(combos)
