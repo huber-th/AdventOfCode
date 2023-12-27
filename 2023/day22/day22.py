@@ -43,6 +43,34 @@ def solve1():
     return len(cubes) - len(crucial)
 
 
+def solve2(remove_cube_id = None):
+    highest, heights = {}, {}
+    for i, cube in enumerate(cubes):
+        if remove_cube_id == i:
+            continue
+        # determine xy base for the current cube
+        base = [
+            (x, y)
+            for x in range(cube[0][0], cube[1][0] + 1)
+            for y in range(cube[0][1], cube[1][1] + 1)
+        ]
+
+        best = [0, set()]
+        for xy in base:
+            if xy not in highest:
+                continue
+            height, cube_id = highest[xy]
+            if height > best[0]:
+                best = [height, set([cube_id])]
+            elif height == best[0]:
+                best[1].add(cube_id)
+
+        heights[i] = best[0]
+        new_height = best[0] + cube[1][2] - cube[0][2] + 1
+        for xy in base:
+            highest[xy] = (new_height, i)
+    return heights
+
 if __name__ == '__main__':
     data = load_data('input')
 
@@ -51,3 +79,12 @@ if __name__ == '__main__':
 
     print('Part one:')
     print(solve1())
+    print('Part two:')
+    heights = solve2()
+    res = 0
+    for id, cube in enumerate(cubes):
+        heights_without_cube = solve2(id)
+        heights_without_cube[id] = -1
+        res += sum(1 for c in range(len(cubes)) if heights_without_cube[c] != heights[c])
+    print(res-len(cubes))
+
