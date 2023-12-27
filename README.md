@@ -4,4 +4,5 @@
 
 ![](https://img.shields.io/badge/advent_of_code-2023-FC4C02?logo=adventofcode)
 ![](https://img.shields.io/badge/days%20completed-20-FC4C02)
-![](https://img.shields.io/badge/stars%20⭐-43-FC4C02)  
+![](https://img.shields.io/badge/days%20partially%20completed-4-FC4C02)
+![](https://img.shields.io/badge/stars%20⭐-44-FC4C02)
