@@ -56,6 +56,72 @@ def hike_the_scenic_route(map, x, y, steps, visited):
     return result
 
 
+def explore_map(map, x, y, steps, intersections, px, py):
+    """ Explore the  map and record all intersections with their distances """
+
+    if map[y][x] == '.' and y == len(map) - 1:
+        intersections.append((y,x,py,px,steps))
+        return
+    map[y][x] = 'c'
+
+    dx = [0,-1,0,1]
+    dy = [1,0,-1,0]
+    options = []
+    for i in range(4):
+        nx = x+dx[i]
+        ny = y+dy[i]
+
+        if nx < 0 or ny < 0 or nx >= len(map[0]) or ny >= len(map):
+            continue
+        # we cannot go through walls
+        if map[ny][nx] == '#':
+            continue
+        # do not go back if the move would lead to the previous intersection
+        if ny == py and nx == px:
+            continue
+        # do not go back, c is used to mark the previous spot
+        if map[ny][nx] == 'c':
+            map[ny][nx] = 'o'
+            continue
+
+        options.append((ny,nx))
+
+    if len(options) == 0:
+        map[y][x] = 'o'
+    if len(options) > 1:
+        intersections.append((y,x,py,px,steps))
+        px = x
+        py = y
+        map[y][x] = 'x'
+        steps = 0
+    for o in options:
+        # do not move somewhere we have already been
+        if map[o[0]][o[1]] == 'o':
+            continue
+        nxt_steps = steps + 1
+        ny, nx = o
+        explore_map(map, nx, ny, nxt_steps, intersections, px, py)
+
+
+def hike_nodes(nodes, pos, steps, visited, goal):
+    visited.append(pos)
+
+    if pos == goal:
+        return steps
+
+    max_steps = 0
+    for nxt in nodes[pos]:
+        nxt_pos = (nxt[0],nxt[1])
+        if nxt_pos in visited:
+            continue
+        nxt_steps = steps + nxt[2]
+        nxt_visited = deepcopy(visited)
+        nxt_steps_taken = hike_nodes(nodes, nxt_pos, nxt_steps, nxt_visited, goal)
+        max_steps = nxt_steps_taken if nxt_steps_taken > max_steps else max_steps
+
+    return max_steps
+
+
 if __name__ == '__main__':
     map = load_data('input')
 
@@ -68,3 +134,19 @@ if __name__ == '__main__':
     print(hike_the_scenic_route(map, x, y, 0, []))
 
     print('Part two:')
+    # Explore the map to reduce it to just intersections and their distances to each other
+    intersections = []
+    explore_map(map, x, y, 0, intersections, x, y)
+    nodes = {}
+    for i in intersections:
+        nodes[(i[0],i[1])] = []
+        nodes[(i[2],i[3])] = []
+    for i in intersections:
+        nodes[(i[0],i[1])].append((i[2],i[3],i[4]))
+        nodes[(i[2],i[3])].append((i[0],i[1],i[4]))
+
+    for i, p in enumerate(map[-1]):
+        if p == '.':
+            x = i
+    print(hike_nodes(nodes, (0,1), 0, [], (len(map)-1, x)))
+
