@@ -1,5 +1,6 @@
 """ filesystem paths module """
 from pathlib import Path
+from copy import deepcopy
 
 
 def load_data(file: str):
@@ -25,7 +26,7 @@ def print_matrix(matrix: list[list[str]]):
     print('----------------')
 
 
-def bfs(matrix: list[list[str]], queue: list[tuple[int, int, int]], max_depth: int):
+def bfs(matrix: list[list[str]], queue: list[tuple[int, int, int]], max_depth: int, parity: int):
     """ solve using breadth first search to mark the positions step by step """
     # right, down, left, up
     dx = [1,0,-1,0]
@@ -51,9 +52,15 @@ def bfs(matrix: list[list[str]], queue: list[tuple[int, int, int]], max_depth: i
                 continue
 
             # if steps are odd we can't reach it in an even number of steps
-            matrix[y][x] = 'O' if (current[2]+1) % 2 == 0 else '.'
+            matrix[y][x] = 'O' if (current[2]+1) % 2 == parity else '.'
             if current[2]+1 < max_depth:
                 queue.append((x,y, current[2]+1))
+    res = 0
+    for r in data:
+        for c in r:
+            if c == 'O':
+                res += 1
+    return res
 
 
 if __name__ == '__main__':
@@ -68,11 +75,13 @@ if __name__ == '__main__':
     data[y][x] = 'O'
 
     print('Part one:')
-    bfs(data, [(x, y, 0)], 64)
-    res: int = 0
-    for r in data:
-        for c in r:
-            if c == 'O':
-                res += 1
-    print(res)
+    print(bfs(data, [(x, y, 0)], 65, 1))
     print('Part two:')
+    n = int((26501365-65)/131)
+    even_diamond = bfs(data, [(x, y, 0)], 65, 0)
+    odd_diamond = bfs(data, [(x, y, 0)], 65, 1)
+    even_full = bfs(data, [(x, y, 0)], 130, 0)
+    odd_full = bfs(data, [(x, y, 0)], 130, 1)
+    even_corners = even_full - even_diamond
+    odd_corners = odd_full - odd_diamond
+    print(((n+1)*(n+1)) * odd_full + (n*n) * even_full - (n+1) * odd_corners + n * even_corners)
