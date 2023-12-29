@@ -1,6 +1,6 @@
 """ filesystem paths module """
 from pathlib import Path
-import sympy.geometry as gm
+from sympy import symbols, solve, geometry
 from itertools import combinations
 
 
@@ -22,7 +22,6 @@ if __name__ == '__main__':
     data = load_data('input')
     min_area = 200000000000000
     max_area = 400000000000000
-    # print(data)
 
     combos = list(combinations(data, 2))
     print('Part one:')
@@ -36,8 +35,8 @@ if __name__ == '__main__':
         by = c[1][0][1]
         bvx = c[1][1][0]
         bvy = c[1][1][1]
-        line1=gm.Line(gm.Point(ax,ay),gm.Point((ax+avx, ay+avy)))
-        line2=gm.Line(gm.Point(bx,by),gm.Point((bx+bvx, by+bvy)))
+        line1=geometry.Line(geometry.Point(ax,ay),geometry.Point((ax+avx, ay+avy)))
+        line2=geometry.Line(geometry.Point(bx,by),geometry.Point((bx+bvx, by+bvy)))
         intersection=line1.intersection(line2)
         if len(intersection) > 0:
             ix = intersection[0].evalf().x
@@ -58,3 +57,38 @@ if __name__ == '__main__':
     print(res)
 
     print('Part two:')
+    hails = data[:3]
+
+    X1,V1 = hails[0]
+    X2,V2 = hails[1]
+    X3,V3 = hails[2]
+
+    x1, y1, z1 = X1
+    x2, y2, z2 = X2
+    x3, y3, z3 = X3
+
+    vx1, vy1, vz1 = V1
+    vx2, vy2, vz2 = V2
+    vx3, vy3, vz3 = V3
+
+    x = symbols('x')
+    y = symbols('y')
+    z = symbols('z')
+    vx = symbols('vx')
+    vy = symbols('vy')
+    vz = symbols('vz')
+
+    equations = [
+        (y1-y)*(vz1-vz)-(z1-z)*(vy1-vy),
+        (z1-z)*(vx1-vx)-(x1-x)*(vz1-vz),
+        (x1-x)*(vy1-vy)-(y1-y)*(vx1-vx),
+        (y2-y)*(vz2-vz)-(z2-z)*(vy2-vy),
+        (z2-z)*(vx2-vx)-(x2-x)*(vz2-vz),
+        (x2-x)*(vy2-vy)-(y2-y)*(vx2-vx),
+        (y3-y)*(vz3-vz)-(z3-z)*(vy3-vy),
+        (z3-z)*(vx3-vx)-(x3-x)*(vz3-vz),
+        (x3-x)*(vy3-vy)-(y3-y)*(vx3-vx)
+    ]
+
+    solution = solve(equations, [x, y, z, vx, vy, vz], dict=True)[0]
+    print(solution[x] + solution[y] + solution[z])
