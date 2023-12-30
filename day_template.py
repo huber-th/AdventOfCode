@@ -1,4 +1,3 @@
-""" filesystem paths module """
 from pathlib import Path
 
 
