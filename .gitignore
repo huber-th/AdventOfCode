@@ -1,5 +1,5 @@
 # virtualenv directory
 .venv
 # puzzle test and input files
-test
+test*
 input
