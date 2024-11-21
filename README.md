@@ -9,5 +9,5 @@
 ![](https://img.shields.io/badge/days%20completed-10-FC4C02)
 ![](https://img.shields.io/badge/stars%20⭐-20-FC4C02)\
 ![](https://img.shields.io/badge/advent_of_code-2021-FC4C02?logo=adventofcode)
-![](https://img.shields.io/badge/days%20completed-01-FC4C02)
-![](https://img.shields.io/badge/stars%20⭐-02-FC4C02)
+![](https://img.shields.io/badge/days%20completed-02-FC4C02)
+![](https://img.shields.io/badge/stars%20⭐-04-FC4C02)
