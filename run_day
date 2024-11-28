@@ -1,7 +1,0 @@
-#!/bin/bash
-
-while true;
-	clear;
-	do python3 ${1}/${2}/${2}.py;
-	sleep 1;
-done
