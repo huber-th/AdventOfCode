@@ -4,20 +4,20 @@ echo ''
 echo 'Bootstrapping AoC' $1 'Day' $2
 echo ''
 
-mkdir -p $1/$2
+mkdir -p $1/day$2
 printf 'Created directory: %s \xE2\x9C\x94\n' "$1/$2"
 echo ''
 
-cp template/day.py $1/$2/day$2.py
+cp template/day.py $1/day$2/day$2.py
 printf 'Created: %s \xE2\x9C\x94\n' "$1/$2/day$2.py"
 echo ''
 
-touch $1/$2/input
+touch $1/day$2/input
 printf 'Created: %s \xE2\x9C\x94\n' "$1/$2/input"
 echo ''
 
-touch $1/$2/test
+touch $1/day$2/test
 printf 'Created: %s \xE2\x9C\x94\n' "$1/$2/test"
 echo ''
 
-vim $1/$2/day$2.py $1/$2/input $1/$2/test
+vim $1/day$2/day$2.py $1/day$2/input $1/day$2/test
