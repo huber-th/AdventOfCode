@@ -11,13 +11,13 @@ def load_data():
     p = Path(__file__).with_name('test')
     with p.open('r', encoding='utf8') as f:
         c = f.read().strip()
-    print(c)
     return c
 
 
 def part_one():
     """ Solution Implementation for Part 1 """
     data = load_data()
+    print(data)
 
     print('Part one:')
 
