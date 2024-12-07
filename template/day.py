@@ -2,30 +2,29 @@
 from pathlib import Path
 
 
-def load_data(file: str):
+def load_data():
     """
     Load and sanitize data
 
     Return: The loaded and sanitized file content for processing
     """
-    p = Path(__file__).with_name(file)
+    p = Path(__file__).with_name('test')
     with p.open('r', encoding='utf8') as f:
         c = f.read().strip()
+    print(c)
     return c
 
 
 def part_one():
     """ Solution Implementation for Part 1 """
-    data = load_data('test')
-    print(data)
+    data = load_data()
 
     print('Part one:')
 
 
 def part_two():
     """ Solution Implementation for Part 2 """
-    data = load_data('test')
-    print(data)
+    data = load_data()
 
     print('Part two:')
 
