@@ -5,8 +5,8 @@
 ## :snowman: Holiday Puzzle Journey
 
 ![](https://img.shields.io/badge/advent_of_code-2024-FC4C02?logo=adventofcode)
-![](https://img.shields.io/badge/days%20completed-13-FC4C02)
-![](https://img.shields.io/badge/stars%20⭐-26-FC4C02)\
+![](https://img.shields.io/badge/days%20completed-14-FC4C02)
+![](https://img.shields.io/badge/stars%20⭐-28-FC4C02)\
 ![](https://img.shields.io/badge/advent_of_code-2023-FC4C02?logo=adventofcode)
 ![](https://img.shields.io/badge/days%20completed-25-FC4C02)
 ![](https://img.shields.io/badge/stars%20⭐-50-FC4C02)\
