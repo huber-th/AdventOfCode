@@ -1,0 +1,3 @@
+#!/bin/bash
+clear;
+python3 ${1}/day${2}/day${2}.py;
